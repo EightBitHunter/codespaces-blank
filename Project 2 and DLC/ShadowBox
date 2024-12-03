@@ -1,0 +1,74 @@
+//This class is used to create a shadowbox object and save where the placements of the moons inside of it are. There are multiple methods used over in main
+public class ShadowBox {
+    static boolean fullMoon;
+    static boolean crescent;
+    static boolean halfMoon;
+    static boolean correctSlotOne;
+    static boolean correctSlotTwo;
+    static boolean correctSlotThree;
+
+    public static void slotOne(int number){//use a method to save where the moon is placed and uses booleans to save it as true or false
+        switch (number){
+            case 1:
+                fullMoon = true;
+                crescent = false;
+                halfMoon = false;
+                break;
+            case 2:
+                fullMoon = false;
+                crescent = true;
+                halfMoon = false;
+                correctSlotOne = true;//mark this as correct so that in the final check if they match, then the player can move on
+                break;
+            case 3:
+                fullMoon = false;
+                crescent = false;
+                halfMoon = true;
+                break;
+        }
+    }
+
+    public static void slotTwo(int number){//same thing as above
+        switch (number){
+            case 1:
+                fullMoon = true;
+                crescent = false;
+                halfMoon = false;
+                break;
+            case 2:
+                fullMoon = false;
+                crescent = true;
+                halfMoon = false;
+                break;
+            case 3:
+                fullMoon = false;
+                crescent = false;
+                halfMoon = true;
+                correctSlotTwo = true;// same as above
+                break;
+        }
+    }
+    public static void slotThree(int number){//same thing as above
+        switch (number){
+            case 1:
+                fullMoon = true;
+                crescent = false;
+                halfMoon = false;
+                correctSlotThree = true;//same as above
+                break;
+            case 2:
+                fullMoon = false;
+                crescent = true;
+                halfMoon = false;
+                break;
+            case 3:
+                fullMoon = false;
+                crescent = false;
+                halfMoon = true;
+                break;
+        }
+    }
+    public static boolean checkCorrect(){// use the correct boolean set to check to see if the player has solved the puzzle
+        return correctSlotOne && correctSlotThree && correctSlotTwo;
+    }
+}

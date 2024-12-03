@@ -1,0 +1,510 @@
+//This program is an escape room! It is a text based adventure game that the player has to navigate by interacting with the puzzles in the room in the right order. There will be
+//different things that go on, but they will be documented as they come up.
+
+import java.util.Scanner;
+import java.util.Random;
+//creating all the things that will traverse through each different method (action)
+//Some of these are to create checks if the player has certain objectives completed, and some of these are for if a player repeats a room
+//Each will be explained when implemented
+static Scanner input = new Scanner(System.in);
+static int playerChoice;
+static int deathChance;
+//booleans are easier to make static here because we don't have to define them, and they automatically get assigned the 'false' value
+static boolean electricity;
+static boolean firstTime;
+static boolean mainRoomRepeatedTime;
+static boolean shapeRepeatedTime;
+static boolean pentagonalPrismDone;
+static boolean directionalOneDone;
+static boolean heptagonalPrismDone;
+static boolean directionalTwoDone;
+static boolean tryAgain;
+static boolean cubeDone;
+static boolean firstJournal = true;
+
+
+public void main() {
+    //main menu/start screen
+    System.out.println("Hello player! Welcome to \"The Shape Shift\"!");
+    //This ascii art was found on https://www.asciiart.eu/miscellaneous/keys
+    System.out.println(" ooo,    .---.\no`  o   /    |\\________________\no`   'oooo()  | ________   _   _)\n`oo   o` \\    |/        | | | |\n`ooo'   `---'         \"-\" |_|");
+    System.out.println("This is an escape room where you try and battle the puzzles with your wit!\nThe goal is to escape the room, and if you jiggle the door handle unsuccessfully, then the room will have an escalating chance to flood with water and you will have to start over once it does. You will have access to a journal, which you can access when you start the game by typing 0.\n*To start type in the the number 1, or to end type in the number 2!*");
+    startingChoice();
+}
+
+public void startingChoice() {
+    Player you = new Player(); //Create the player class to store data on progress
+    // takes the players choice and then starts the program
+    playerChoice = input.nextInt();
+    firstTime = true;
+    switch (playerChoice) {
+        case 1:
+            mainRoom();
+            break;
+        case 2:
+            System.exit(0);
+        default:
+            System.out.println("*Please type either the number 1 or 2 in the box please!*");
+            startingChoice();
+    }
+}
+
+public static void mainRoom() {
+    //Checks if this is the players first time in the room, and if so gives them an introduction
+    if (firstTime) {
+        System.out.println("\nYou wake up in a new room unfamiliar with your surroundings. You slowly wake up and notice a couple of oddities around the room. There are some words written on your arm in pen, but you have to focus to read them out.\nIn front of you are three things that draw your attention. There is a directional pad on the floor to your left, a pedestal with 5 three dimensional shapes behind it straight ahead, and a safe with a combination lock on it on the far right corner of the room.");
+        System.out.println("There is a door to the right of you, and you notice the room is decorated lavishly with old paintings, dressers, cabinets, and a grandfather clock.");
+        System.out.println("*Type 0 to open the journal, type 1 to inspect the writing on your arm, type 2 to interact with the directional pad on the left, type 3 to interact with the pedestal, type 4 to interact with the combination lock, or type 5 to try to open the door.*");
+        playerChoice = input.nextInt();
+    } else if (tryAgain) { // This is to check for if they player is trying to input a correct response down below
+        playerChoice = input.nextInt();
+    } else if (mainRoomRepeatedTime) { // this is for if you come back to the main room anytime after your first time
+        System.out.println("*You are in the main room. Type 0 to open the journal, type 1 to inspect the writing on your arm, type 2 to interact with the directional pad on the left, type 3 to interact with the pedestal, type 4 to interact with the combination lock, or type 5 to try to open the door.*");
+        playerChoice = input.nextInt();
+    }
+    //sets up that the player has been here for the first time, they no longer are trying again, and the check for if they come back is now true
+    firstTime = false;
+    tryAgain = false;
+    mainRoomRepeatedTime = true;
+    switch (playerChoice) {// player choice now, takes them to the next method and starts the main obj
+        case 0:
+            journal();
+            break;
+        case 1:
+            inspectArm();
+            break;
+        case 2:
+            dPad();
+            break;
+        case 3:
+            shapePedestal();
+            break;
+        case 4:
+            lock();
+            break;
+        case 5:
+            tryDoor();
+            break;
+        default:
+            System.out.println("*Please enter one of these options {0 Journal, 1 Inspect writing, 2 Directional pad, 3 Shape pedestal, 4 combination lock, or 5 Door handle}*");
+            tryAgain = true;// this is so they can input another answer quickly
+            mainRoom();
+    }
+}
+
+public static void journal() {
+    if (firstJournal) {// this only prints if they have just opened the journal
+        System.out.println("*Welcome to the journal. You can re-read hints from earlier on. Type in 1 for journal entry one, 2 for journal entry 2, 3, 4, 5, or 6 respectively. Type 0 to go back to the main selection screen.*");
+        firstJournal = false;
+    } else{
+        System.out.println("*Type in 1 for journal entry one, 2 for journal entry 2, 3, 4, 5, or 6 respectively. Type 0 to go back to the main selection screen.*");
+    }
+    playerChoice = input.nextInt();//placed this here so that the program can relaunch the journal choice prompt without needing the text. Faster to run this way
+    if (playerChoice == 0){
+        mainRoom();
+    }
+    Player.getEntry(playerChoice);//sends the request for info to the player class where the journals are stored
+    journal();//sends back to journal and becomes an infinite loop IFFFFFFF the player doesnt hit 0, otherwise its not infinite and there IS AN OUT.
+}
+
+public static void inspectArm() {
+    if (Player.entryOne) {// if they already have the entry, no need for it to read back to them since they have the journal
+        System.out.println("You already have recorded this in your journal.");
+        mainRoom();
+    } else {
+        System.out.println("\nYou read the pen marks on your arm and they read to say,\" Four your first challenge, adorn the pedestal with shapes\".\nYou noted this in your journal as entry 1.");//print this back to the user and save the entry as completed
+        Player.makeYes(1);//mark the first entry in the player class as true
+        mainRoom();
+    }
+}
+
+public static void dPad() {
+    //Creating the inputs for the directional keypad so they can be stored
+    int playerChoice;
+    if (electricity) {
+        System.out.println("*You approach the directional pad on the ground, and it hums with electricity. It has four options, up, right, down, and left. Type 1 to start a sequence or type 2 to go back to the main room.*");
+        playerChoice = input.nextInt();
+        switch (playerChoice) {
+            case 1:// if they chose to input a sequence while powered up, it allows them to type in a number for a direction each time and re prompts them over and over again
+                System.out.println("*Please input the first direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dOne = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dTwo = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dThree = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dFour = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dFive = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dSix = input.nextInt();
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dSeven = input.nextInt();
+                //create the if statement for the second directional puzzle here, if they have the digits/directions right it will complete it
+                if (dOne == 3 && dTwo == 2 && dThree == 1 && dFour == 4 && dFive == 2 && dSix == 1 && dSeven == 3) {
+                    System.out.println("Each input you made resounded in a loud click. After the code was put in the black light turned on again. When looking in the middle on the candle pentagram you now notice a number 7 in the middle of the candles.\nYou note this in your journal as entry 5.\nYou step back as the directional pad no longer hums with electricity.");
+                    electricity = false;
+                    Player.makeYes(5);
+                    directionalTwoDone = true;
+                    mainRoom();
+                }
+                //if the above doesn't complete, this next code will run and allow for the first directional puzzle to be completed
+                System.out.println("*Please input the next direction in your sequence. 1 is up, 2 is right, 3 is down, and 4 is left.*");
+                int dEight = input.nextInt();
+                if (dOne == 1 && dTwo == 1 && dThree == 3 && dFour == 3 && dFive == 4 && dSix == 2 && dSeven == 4 && dEight == 2) {
+                    System.out.println("Each input you made resounded in a loud click. After the code was put in, a painting along the wall fell down. In front of the painting sits 5 candles which are now lit. They are arranged in the shape of a pentagram. The lights have turned back on and the black light was turned off.\nYou noted this in your journal as entry 3.\nYou step back as the directional pad no longer hums with energy.");
+                    electricity = false;
+                    Player.makeYes(3);
+                    directionalOneDone = true;
+                    mainRoom();
+                }
+            case 2:
+                mainRoom();//send them back to the main room
+                break;
+            default:
+                System.out.println("*Incorrect input. Please input either 1 or 2.*");
+                dPad();//restart the dpad method so they can correct their input
+        }
+    } else {//if the pad has no electricity, then the player can interact with it, but it will do nothing. CHANCE TO PUT IN SECRET CODE HERE???
+        System.out.println("*You approach the directional pad on the ground. It has four options, up, right, down, and left. Type 1 to press up, type 2 to press right, type 3 to press down, type 4 to press left, and type 0 to go back to the main room.*");
+        playerChoice = input.nextInt();
+        if (playerChoice == 1 || playerChoice == 2 || playerChoice == 3 || playerChoice == 4) {
+            System.out.println("You press on the pad, but it does nothing. You step away wondering if you should come back later...");
+            dPad();
+        } else if (playerChoice == 0) {
+            System.out.println("You decide to step away from the pad for now and go back to the main room.");
+            mainRoom();
+        } else {
+            System.out.println("*Incorrect input. Please input a number 0-4.*");
+            dPad();
+        }
+    }
+}
+
+public static void shapePedestal() {
+    if (shapeRepeatedTime) {//same type of code block, if they repeat this I want different text to appear so it doesn't feel unnatural.
+        System.out.println("*You approach the shape pedestal again. Type 1 to place the triangular prism, type 2 to place the cube, type 3 to place the pentagonal prism, type 4 to place the hexagonal prism, type 5 to place the heptagonal prism, and type 0 to go back to the main room.*");
+    } else {
+        System.out.println("*You approach the shape pedestal. There are 5 different three dimensional shapes to choose from. Type 1 to place the triangular prism, type 2 to place the cube, type 3 to place the pentagonal prism, type 4 to place the hexagonal prism, type 5 to place the heptagonal prism, and type 0 to go back to the main room.*");
+    }
+    shapeRepeatedTime = true;
+    playerChoice = input.nextInt();
+    switch (playerChoice) {//another switch case, allows the player to make their choice and respond in different ways
+        case 0:
+            shapeRepeatedTime = false;
+            mainRoom();
+            break;
+        case 1:
+            System.out.println("You place the triangular prism on the pedestal. You hear a dull click and nothing happens. You take the triangular prism and place it back with the other shapes.");
+            shapePedestal();
+            break;
+        case 2:
+            if (cubeDone) {//if the cube puzzle is already done, then I don't want the code block to repeat over again
+                System.out.println("You place the cube back onto the pedestal. You hear a dull click and nothing happens. You take the cube and place it back with the other shapes.");
+                shapePedestal();
+            } else {
+                System.out.println("You place the cube onto the pedestal. A switch activates, the room lights turn off, and a black light turns on. The black light shines onto the cube and it now shows the code \"up, up, ____, ____, left, right, left, right.\"\nThe clock chimes 3 times and the hum of electricity can be heard from the directional pad now. You write this in your journal as entry two.\nYou remove the cube and place it back with the other shapes.");
+                electricity = true;//mark these as true so that the player gains access to journal entries and mark the puzzle as done, as well as start the activation of the dpad
+                Player.makeYes(2);
+                cubeDone = true;
+                System.out.println("You take a step back into the main room.");
+                mainRoom();
+            }
+            break;
+        case 3:
+            if (pentagonalPrismDone) {//same as the cube, see if the puzzle has been done
+                System.out.println("You place the pentagonal prism back onto the pedestal. You hear a dull click and nothing happens. You take the pentagonal prism and place it back with the other shapes.");
+                shapePedestal();
+            } else if (directionalOneDone) {//make sure the directional puzzle has been completed, otherwise it does nothing. This is an escalating boolean check to make sure all the requirements are met. Must have the previous one to get the next
+                System.out.println("You place the pentagonal prism onto the pedestal. A switch activates inside the shape and the top opens up. Inside there is a note and it reads,\n\"The 7 sins are the folly of man.\nLooking down is pride on those who lied,\nLooking right is envy with wishes aplenty,\nLooking up is wrath on the bloody path,\nLooking left is sloth covered in tattered cloth,\nLooking right is greed never wanting to concede,\nLooking up is lust with desires unjust,\nAnd looking down is gluttony gnashing his teeth sullenly.\"\nThe clock chimes 8 times and the directional pad hums with electricity again.\nYou remove the pentagonal prism and place it back with the other shapes.");
+                System.out.println("You record this down as entry 4 in your journal.");
+                electricity = true;
+                Player.makeYes(4);
+                pentagonalPrismDone = true;
+                System.out.println("You take a step back into the main room.");
+                mainRoom();
+            } else {
+                System.out.println("You place the pentagonal prism onto the pedestal. You hear a dull click and nothing happens. You take the pentagonal prism and place it back with the other shapes.");
+                shapePedestal();
+            }
+            break;
+        case 4:
+            System.out.println("You place the hexagonal prism on the pedestal. You hear a dull click and nothing happens. You take the hexagonal prism and place it back with the other shapes.");
+            shapePedestal();//same thing as the pentagonal puzzle, make the checks and see if they have the necessary puzzles done
+            break;
+        case 5:
+            if (heptagonalPrismDone) {
+                System.out.println("You place the heptagonal prism back onto the pedestal. You hear a dull click and nothing happens. You take the heptagonal prism and place it back with the other shapes.");
+                shapePedestal();
+            } else if (directionalTwoDone) {
+                System.out.println("You place the heptagonal prism onto the pedestal. There is a loud switch that activates and a drawer underneath the pedestal opens up. You look inside the drawer and see that on the inside written in ink are the words,\"The chimes of the clock open the lock.\"\nYou take the heptagonal prism of the pedestal and place it with the other shapes.");
+                Player.makeYes(6);
+                heptagonalPrismDone = true;
+                System.out.println("You take a step back into the main room.");
+                mainRoom();
+            } else {
+                System.out.println("You place the heptagonal prism onto the pedestal. You hear a dull click and nothing happens. You take the heptagonal prism and place it back with the other shapes.");
+                shapePedestal();
+            }
+            break;
+        default:
+            System.out.println("*Incorrect input. Please enter a number 0-5.*");//default if they make a wrong input
+            shapePedestal();
+    }
+}
+
+public static void lock() {
+    //create variables so that they stay within this method, no need to define them elsewhere
+    int lockOne;
+    int lockTwo;
+    int lockThree;
+    System.out.println("*You approach the lock to the safe. It is a scrolling number lock with inputs of 0-9 in the sequence X-X-X. Type 1 to enter a sequence into the lock, and type 2 to go back into the main area.*");
+    playerChoice = input.nextInt();//allow the player to choose to put in a sequence
+    switch (playerChoice) {
+        case 1:
+            System.out.println("*Please input your sequence of characters one at a time. Type your first number now:*");
+            lockOne = input.nextInt();//store each input in a different int
+            System.out.println("*Type your second number now:*");
+            lockTwo = input.nextInt();
+            System.out.println("*Type your third number now:*");
+            lockThree = input.nextInt();
+            if (lockOne == 3 && lockTwo == 8 && lockThree == 7) {//if the sequence is in the right order, then it opens
+                System.out.println("You have input the correct code and the lock opens with a click. You open the safe and find a lone key inside.");
+                Player.getKey();
+                System.out.println("You take a step back and have the key in your hand now.");
+                mainRoom();
+            } else {//if sequence is not right, then it doesn't do anything
+                System.out.println("The lock stays shut and doesn't budge. You take a step back and contemplate what the numbers could be.");
+                lock();
+            }
+            break;
+        case 2:
+            mainRoom();
+            break;
+        default:
+            System.out.println("*Please input either 1 or 2 into the box.*");
+            lock();
+            break;
+    }
+}
+
+public static void tryDoor() {
+    //create variables and objects only seen in the method
+    Random random = new Random();
+    if (Player.hasKey) {
+        System.out.println("*You used the key you picked up from the safe to unlock the door. There is an elevator in front of you. Do you choose to go up and escape, or go down and find more buried secrets? Choose 1 for up, and 2 for down. *");
+        playerChoice = input.nextInt();
+        if(playerChoice == 1){
+            System.out.println("You have won the game, congrats! There are more secrets to be discovered in the basement however...");
+            //This ascii art was found on https://www.asciiart.eu/holiday-and-events/fireworks
+            System.out.println("""
+                              *    *
+                   *         '       *       .  *   '     .           * *
+                                                                             '
+                     *                *'          *          *        '
+                   .          *               |               /
+                              '.         |    |      '       |   '     *
+                                 |*        |   |             /
+                       '          |     '* |    |  *        |*                *  *
+                            *      `.       |   |     *     /    *      '
+                  .                  |      |   |          /               *
+                     *'  *     '      |      |   '.       |
+                        -._            `                  /         *
+                  ' '      ``._   *                           '          .      '
+                   *           **          * .   .      *
+                  '        *    `-._                       .         _..:='        *
+                             .  '      *       *    *   .       _.:--'
+                          *           .     .     *         .-'         *
+                   .               '             . '   *           *         .
+                  *       ___.-=--..-._     *                '               '
+                                                  *       *
+                                *        _.'  .'       `.        '  *             *
+                     *              *_.-'   .'            `.               *
+                                   .'                       `._             *  '
+                   '       '                        .       .  `.     .
+                       .                      *                  `
+                               *        '             '                          .
+                     .                          *        .           *  *
+                             *        .                                    '
+                """);
+            System.exit(0);//exit the game after they win
+        }else if(playerChoice == 2){
+            System.out.println("You have chosen to go deeper into the madness.");
+            basementOne();//Send them into the new DLC
+        }
+
+    } else {
+        if (deathChance > 50) {//if they jiggle the door handle and their death chance is higher than 50, then it's an instant death. Guaranteed to not kill the first time times, but it increases every time after
+            System.out.println("You jiggled the door handle and the room began to be filled with water. You try to find an escape but it is too late.\nGAME OVER.");
+            //art is pulled from https://ascii.co.uk/art/skulls
+            System.out.println("""
+                             _______________
+                            /               \\
+                           /                 \\
+                          /                   \\
+                          |   XXXX     XXXX   |
+                          |   XXXX     XXXX   |
+                          |   XXX       XXX   |
+                          |         X         |
+                          \\__      XXX     __/
+                            |\\     XXX     /|
+                            | |           | |
+                            | I I I I I I I |
+                            |  I I I I I I  |
+                             \\_           _/
+                              \\_         _/
+                                \\_______/
+                      XXX                        XXX
+                    XXXXX                        XXXXX
+                     XXXXXXXXXX             XXXXXXXXXX
+                             XXXXX     XXXXX
+                                 XXXXXXX
+                             XXXXX     XXXXX
+                     XXXXXXXXXX             XXXXXXXXXX
+                    XXXXX                        XXXXX
+                      XXX                        XXX
+                    """);
+            System.exit(0);
+        } else {
+            deathChance += deathChance + random.nextInt(25);//increase the death chance so that living is not guaranteed.
+            System.out.println("You jiggled the door handle, but it jiggles and does nothing. You feel a lingering sense of dread after your hand leaves the handle, almost like you got one step closer to death.");
+        }
+    }
+    mainRoom();//Send them back to the main room options if they don't die
+}
+
+public static void basementOne(){// set up the first DLC room as a method within the main class
+    System.out.println("You step out of the elevator. You walk into a long hallway made of stone. The lights from the ceiling are flickering and the air around you feels damp.\nYou continue to walk and find a door that you open. When you open this door, a clock in the corner of the room makes a grand singular *BONG*.There is a chair and a desk in the center of the room. You sit at the chair and begin to feel lightheaded as a prickling sensation enters your leg.");
+    boolean timeLoop = true;//use this to start the time loop sequences. There are many in the DLC and this is used throughout
+    while (timeLoop){
+        System.out.println("A loud chime sounds from the clock in the corner, and you wake up from the desk to realize your hands and feet are bound. There is nobody else in the room, but the floor around the door is dry, indicating someone came in while you were unconscious.\n*Press 1 to yell for help, Press 2 to try and wiggle loose, or Press 3 to rock the chair to the ground.*");
+        playerChoice = input.nextInt();
+        switch (playerChoice){//first switch case for player options
+            case 1:
+                System.out.println("You call for help, and hear the door behind you slam open.\"Hey you, be quiet!\", you hear someone yell from behind.\nThere is a prickling sensation as they come up behind you and inject your neck with a syringe filled with a strange fluid. Suddenly the room turns black...");
+                break;
+            case 2:
+                System.out.println("You wiggle from the chair, but you can feel the restraints on your ankles and wrist start to burn. You look around in desperation and notice that one of the buckles on the wrist strap to your right is sharp.\nYou move your wrist in a clockwise manner and slowly start to cut the strap on your right, and with a final small *SNAP* your right arm is free.");
+                System.out.println("With your right arm free, you undo the straps on your left arm, and then make your way down to your legs. The door behind you swings open and a tall man dressed in a suit with glasses walks in.\"Hey, stop right there! You're supposed to be stuck in the Terminal Loop room!\"\nThe man quickly walks towards you with a syringe in his left hand and a shock baton in his right.");
+                System.out.println("*Press 1 to attack his left arm with the syringe, press 2 to attack his right arm with the stun baton, press 3 to run past the guard, or press 4 to use kung-fu to attack him.");
+                playerChoice = input.nextInt();
+                switch (playerChoice){//second switch for player choice, the breaks here reset both so the loop will fully restart
+                    case 1:
+                        System.out.println("You run after the man and hit his left arm with a jab, but before you could dodge he shocks you with the stun baton and he sticks the syringe into your neck...");
+                        break;
+                    case 2:
+                        System.out.println("You dash after the mans right arm with the stun baton and hit his wrist, making him drop the weapon. His other arm was faster than you could move however, and he jabs the syringe into your right arm and the room starts to fade to black...");
+                        break;
+                    case 3:
+                        System.out.println("The man walks toward your with a quick step, but you pick up and fling the wooden desk towards him. It makes a solid impact and throws him to the ground as your run to the door and shut it behind you. You grab the door lock and twist it until a click goes off.\nYou can hear a muffled yell and a loud *BONG* from the clock. Suddenly the room goes silent, and you look out into the dimly lit hallway.");
+                        timeLoop = false;//mark this as false so the loop stops and the player can move on
+                        break;
+                    case 4:
+                        System.out.println("You take a stance you remembered from taking kung-fu classes in 2nd grade. You extend your right arm out and keep the left arm close, but still ready. The man walks closer and you turn your body to kick him in the stomach, but he grabs your leg and you can feel a prick above your ankle. The room starts to spin and fade to black...");
+                        break;
+                }
+                break;
+            case 3:
+                System.out.println("You rock the chair back and forth with such force that the chair starts to tip and finally fall over. You make a loud *BANG* as you hit the floor, and the door behind you swings open.\"You're not supposed to be awake!\", you hear someone shout.\nThere is a prickling sensation as they come up behind you and inject your neck with a syringe filled with a strange fluid. Suddenly the room turns black...\" ");
+            default:
+                System.out.println("*Please input a number between 1-3*");
+                break;
+        }
+        System.out.println("You step back into the hallway and move back towards the elevator. As you step in, you realize that the clock was the signal for when the next loop started. You start to realize how often clocks are a part of this facility, and wonder what it could mean?\nThe buttons on the elevator are all dark except for one that says B2. You press it, and realize that this is only getting started...");
+        basementTwo();// move to the next room, keep it contained in a method for better organization.
+    }
+}
+
+public static void basementTwo(){//Second room of the DLC
+    boolean shadowBoxPuzzle = false;// mark this as false because they havn't solved it yet
+    System.out.println("\nYou get out of the elevator after the doors open and once again you see the same sight as last time, however there is a larger B2 painted on the hallway wall to your left. You go down the hallway and open the door found at the end of it and enter the newest room.\nThis time there is a pedestal with a shadowbox on it. You pick up the shadow box and inspect it.\nThe shadow box has a slot for 3 pieces, one on the left, middle, or right. It looks like small two dimensional shapes can be placed inside of the box.\n*You added the shadowbox to your inventory*");
+    System.out.println("\nYou look up from the box and see another door at the end of the small room, and you open that one as well. There is a short hallway past the door, and as you step into it, the door behind you shuts.\nThere are loud intercoms next to the lights on the ceiling and you can hear static start to pour out of them.\n\"Hello there, it seems you've ended up right where you ought to be,\" the speakers echo a female voice loudly.\"I'm surprised you made it this far this quickly. I will await you on the floor below...\"");
+    ShadowBox box = new ShadowBox();//create a new box to keep track of whether they make the right combinations within it
+    System.out.println("The intercom clicks off and the lights flicker a bit before turning off completely. You look around and realize there are three moons on the wall that are lit up. The moons themselves are small disks that look like they would fit perfectly into the shadowbox.\nOne of them is a full moon, one of them is a half moon, and the other is a crescent. A light right above the wall where the moons are turns on as you pick up the first moon from the wall, and then the next two afterwards.");
+    System.out.println("You bring the shadowbox out of your inventory and notice there are some words above where the placements go for the moons.\"Ascend into the light\", it reads out.");
+    while (!shadowBoxPuzzle){
+        System.out.println("*Press 1 to place the full moon into slot one, press 2 to place the crescent moon into slot one, or press 3 to place the half moon into slot one*");
+        playerChoice = input.nextInt();
+        ShadowBox.slotOne(playerChoice);//use the shadowbox to store the info, makes the switch case much much cleaner
+        System.out.println("*Press 1 to place the full moon into slot two, press 2 to place the crescent moon into slot two, or press 3 to place the half moon into slot two*");
+        playerChoice = input.nextInt();
+        ShadowBox.slotTwo(playerChoice);
+        System.out.println("*Press 1 to place the full moon into slot three, press 2 to place the crescent moon into slot three, or press 3 to place the half moon into slot three*");
+        playerChoice = input.nextInt();
+        ShadowBox.slotThree(playerChoice);
+        if (ShadowBox.checkCorrect()){//use the method checkCorrect to mark shadowbox as true if the sequence is correct
+            shadowBoxPuzzle = true;
+        }else {
+            System.out.println("The pieces don't seem to sit right in your head as you look at them. You reread the text at the top of the shadow box which states,\"Ascend into the light\".");//re loop the player into retrying
+        }
+    }
+    System.out.println("After the last moon was placed into the shadow box correctly, a chip from inside the moons starts to beep and a secret door at the end of the short hallway appears.\nIt opens to another elevator, and as you enter it only the B3 option is lit up to press. You get a bad feeling about the person from the intercom, but go down nonetheless.");
+    basementThree();//send the player to the last room
+}
+
+public static void basementThree(){
+    System.out.println("You step out of the elevator and enter a lavishly decorated room. It looks like a waiting room at a therapists office with posters on the walls, lots of cushions for each seat, and a water cooler in the corner with refreshments.\nYou walk angrily past everything towards the door on the side of the room and barge in. A loud chime is heard from a clock on the wall.\nThere is a middle aged woman with blonde hair sitting behind the desk. She is dressed in business casual attire and wearing a badge with the title of \"Senior Director\" on it.\n\"Welcome back to my office. It seemed like only a couple of hours since you were last here... well I guess it actually was. Now I know your brain must be foggy so let me re-explain what I told you last time.\nYou worked here for us at our private tech lab as part of our research division. You began testing the effects of our recently discovered time loops on humans, but began to run out of test subjects because each one suffered from amnesia after their first loop.\nIn one final desperate attempt, you offered yourself to be tested now that all the pieces had fallen into place. We have been monitoring you since you woke up three floors above where we are now.\nI must say congrats on making it here, seeing as this is your one hundredth time stepping into my office.\nWe decided that we might as well use this amnesia to our full benefit and have been seeing if the amount of time it takes you to solve our puzzles is affected by the time loops or if the amnesia prevents you from making faster times from previous attempts.\"");
+    boolean lastLoop = true;//last time loop starts here
+    while (lastLoop){
+        System.out.println("\"Tell me, how was your experience making it back to my office?\"");
+        System.out.println("*Press 1 to tell her to screw off and this is torture, or press 2 to play along and go with what she is asking*");
+        playerChoice = input.nextInt();
+        if (playerChoice == 1){//use an if instead of a switch because there are only two cases, and the loop will restart quickly
+            System.out.println("You explain that you didn't know who you are or where you are and this is torture to force a human into living the same thing over and over again for their benefit.\n\"Well that's just too bad huh,\" she said, and then reached across the desk further than you could react and stabbed a syringe into your neck. The room fades to black...");
+        } else if(playerChoice == 2){
+            System.out.println("You explain that it wasn't all that bad, and other than initial shock of where you were, that you now realize your life was never really in any danger.\n\"Even in the first room where you woke up, the clocks were devices used to reset the time loops in case you were to fail and the room were filled with water. I do apologize for floor B1 however, we wanted to see how you'd react this time around to being confined within a time room.\"");
+            System.out.println("You begin to look around the room a little and notice that there is another elevator with the mandatory OSHA approved EXIT sign above it. You realize this may be your last chance to get out of this purgatory, and decide to make somehow get out of this situation.");
+            System.out.println("\"As I was saying, are you ready to go back in for another round of testing?\" She extended her right hand in a gesture of goodwill for you to shake it.");
+            System.out.println("You notice that below the right arm chair is a tiny piece of metal that looks like tip of a syringe.\n*Press 1 to stab yourself with the syringe, Press 2 to stab her extended right hand with the syringe, or Press 3 to use your mind powers to blow up the facility.");
+            playerChoice = input.nextInt();
+            switch (playerChoice){
+                case 1:
+                    System.out.println("You grab the syringe from under the arm rest and stab yourself in the arm with it. The woman across the desk looks stupefied and everything fades to black...");
+                    break;
+                case 2:
+                    System.out.println("You grab the syringe from under the arm rest and go to stab her hand, but she pulled back quick enough like she expected you to make this move.\n\"Did you really think we hadn't placed that on purpose? We wanted to see if you still retained aggression for the act of keeping you in here, but we might as well go back for another round...\"\nYou feel a prick on your neck as someone stabbed you from behind, and the world slowly starts to fade into blackness...");
+                    break;
+                case 3:
+                    System.out.println("You squeeze your eyes shut really tight and try your best to imagine the facility exploding into a blaze of glory, but nothing happens.\n\"Did you lose some of your brain function? Maybe it's best if we let you go to prevent further harm to yourself. Besides, now we can milk these tests as much as we need to now that we can use the same test subject over and over for about 100 trials now.\nI guess you're free to go?\"");
+                    lastLoop = false;//breaking the loop here and letting the player win
+                    break;
+                default:
+                    System.out.println("*Please enter a valid number*");
+                    break;
+            }
+        }
+    }
+    System.out.println("You get up from the chair, amazed at how that plan even worked out. You slowly make it over to the elevator door with the exit sign, and walk inside. There is a single button that is lit up, and you press it.\nThe elevator doors close, and you finally embrace true freedom. Then the doors open up, and you walk out of the elevators only to find yourself outside, in the dead of night.\nIts a beautiful night out, and there rests a full moon in the sky way above...");
+    //Ascii art found at https://www.asciiart.eu/space/moons
+    System.out.println("                     .--------------.\n" +
+            "                .---'  o        .    `---.\n" +
+            "             .-'    .    O  .         .   `-.\n" +
+            "          .-'     @@@@@@       .             `-.\n" +
+            "        .'@@   @@@@@@@@@@@       @@@@@@@   .    `.\n" +
+            "      .'@@@  @@@@@@@@@@@@@@     @@@@@@@@@         `.\n" +
+            "     /@@@  o @@@@@@@@@@@@@@     @@@@@@@@@     O     \\\n" +
+            "    /        @@@@@@@@@@@@@@  @   @@@@@@@@@ @@     .  \\\n" +
+            "   /@  o      @@@@@@@@@@@   .  @@  @@@@@@@@@@@     @@ \\\n" +
+            "  /@@@      .   @@@@@@ o       @  @@@@@@@@@@@@@ o @@@@ \\\n" +
+            " /@@@@@                  @ .      @@@@@@@@@@@@@@  @@@@@ \\\n" +
+            " |@@@@@    O    `.-./  .        .  @@@@@@@@@@@@@   @@@  |\n" +
+            "/ @@@@@        --`-'       o        @@@@@@@@@@@ @@@    . \\\n" +
+            "|@ @@@@ .  @  @    `    @            @@      . @@@@@@    |\n" +
+            "|   @@                         o    @@   .     @@@@@@    |\n" +
+            "|  .     @   @ @       o              @@   o   @@@@@@.   |\n" +
+            "\\     @    @       @       .-.       @@@@       @@@      /\n" +
+            " |  @    @  @              `-'     . @@@@     .    .    |\n" +
+            " \\ .  o       @  @@@@  .              @@  .           . /\n" +
+            "  \\      @@@    @@@@@@       .                   o     /\n" +
+            "   \\    @@@@@   @@\\@@    /        O          .        /\n" +
+            "    \\ o  @@@       \\ \\  /  __        .   .     .--.  /\n" +
+            "     \\      .     . \\.-.---                   `--'  /\n" +
+            "      `.             `-'      .                   .'\n" +
+            "        `.    o     / | `           O     .     .'\n" +
+            "          `-.      /  |        o             .-'\n" +
+            "             `-.          .         .     .-'\n" +
+            "                `---.        .       .---'\n" +
+            "                     `--------------'");
+    System.out.println("CONGRATS!!! You have achieved the true ending!");
+    System.exit(0);
+}

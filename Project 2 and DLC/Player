@@ -1,0 +1,86 @@
+//Implementing a new class here to store the journals and items that are on the player
+public class Player {
+    static boolean entryOne;
+    static boolean entryTwo;
+    static boolean entryThree;
+    static boolean entryFour;
+    static boolean entryFive;
+    static boolean entrySix;
+    static boolean hasKey;
+
+    public static void makeYes(int number){// this is used to make the entry's valid and allows them to be accessed
+        switch (number){
+            case 1:
+                entryOne = true;
+                break;
+            case 2:
+                entryTwo = true;
+                break;
+            case 3:
+                entryThree = true;
+                break;
+            case 4:
+                entryFour = true;
+                break;
+            case 5:
+                entryFive = true;
+                break;
+            case 6:
+                entrySix = true;
+                break;
+        }
+    }
+
+    public static void getKey(){//this is used to check to see if the player has they key to enter the door
+        hasKey = true;
+    }
+
+    public static void getEntry(int number){//this code is used to bring out what needs to be printed to the console over in the main file
+        switch (number){
+            case 1:
+                if(entryOne){//Code here is repeated. Same type of check for if they have the journal entry unlocked.
+                    System.out.println("The journal entry states,\" Four your first challenge, adorn the pedestal with shapes\".");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            case 2:
+                if(entryTwo){
+                    System.out.println("The journal entry states,\"After I placed the cube on the table, a black light turned on and a code on the cube appeared. It had directional arrows that went up, up, blank, blank, left, right, left, right. The clock chimed 3 times, and the directional pad started to hum with electricity.");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            case 3:
+                if(entryThree){
+                    System.out.println("The journal entry states,\"After inputting the correct code from the cube puzzle, a painting fell off the wall and 5 candles in front of it lit up in the shape of a pentagon. The lights turned back on afterwards and the black light was turned off.");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            case 4:
+                if(entryFour){
+                    System.out.println("The journal entry states,\"I opened the pentagonal prism and the note inside reads,\n'The 7 sins are the folly of man.\nLooking down is pride on those who lied,\nLooking right is envy with wishes aplenty,\nLooking up is wrath on the bloody path,\nLooking left is sloth covered in tattered cloth,\nLooking right is greed never wanting to concede,\nLooking up is lust with desires unjust,\nAnd looking down is gluttony gnashing his teeth sullenly.'\nThe clock chimed 8 times and the directional pad started to hum with electricity.\"");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            case 5:
+                if(entryFive){
+                    System.out.println("The journal entry states,\"After I input the correct code from the pentagon puzzle I saw that a black light turned on again while the lights stayed on.\nI noticed that the number 7 was now visible in the middle of the pentagram.");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            case 6:
+                if(entrySix){
+                    System.out.println("The journal entry states,\"After placing the heptagonal prism on the pedestal, a cupboard opened with ink that wrote,\"The chimes of the clock open the lock.\"The clock chimed 7 times.");
+                } else {
+                    System.out.println("You do not have this hint unlocked yet.");
+                }
+                break;
+            default:
+                System.out.println("*Please enter one of these options {0 Main Room, 1 Entry one, 2 Entry two, 3 Entry three, 4 Entry four, 5 Entry five, or 6 Entry six}*");
+        }
+    }
+}
